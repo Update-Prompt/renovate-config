@@ -13,7 +13,7 @@ Add `renovate.json` to the repository root:
 }
 ```
 
-Repository-specific settings, such as a custom manager, go next to `extends` in that file.
+Repository-specific settings go next to `extends` in that file.
 
 ## What the preset does
 
@@ -22,6 +22,15 @@ Repository-specific settings, such as a custom manager, go next to `extends` in 
 - **Weekly:** Renovate opens and updates its pull requests before 06:00 UTC on Mondays.
 - **Minor and patch updates** for all dependencies come in **one** pull request a week.
 - **Major updates** get their own pull request each, because they can break things and need their own review.
+- **Versions pinned in workflows and composite actions** are updated when they're marked with a comment on the line above. Without the comment, Renovate doesn't see them.
+
+  ```yaml
+  env:
+    # renovate: datasource=npm depName=@stoplight/prism-cli
+    PRISM_VERSION: 5.15.11
+  ```
+
+  It applies to `.github/workflows/*.yml` and `action.yml` files. `datasource` is one of Renovate's [datasources](https://docs.renovatebot.com/modules/datasource/), such as `npm`, `github-releases` or `docker`.
 - Everything else is Renovate's [`config:recommended`](https://docs.renovatebot.com/presets-config/#configrecommended), including the Dependency Dashboard issue that lists all pending updates.
 
 Each repository's CI runs on Renovate's pull requests like on any other, so a breaking update shows up before it's merged.
