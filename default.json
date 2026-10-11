@@ -14,10 +14,19 @@
       "groupSlug": "minor-and-patch"
     },
     {
-      "description": "Indirect Go modules too. Renovate skips them by default, so a fix in a module like golang.org/x/net would wait until a direct dependency pulled it in.",
+      "description": "Indirect Go modules too, in a weekly PR of their own. Renovate skips them by default, so a fix in a module like golang.org/x/net would wait until a direct dependency pulled it in. A separate group keeps a bad indirect bump from holding back the other updates.",
       "matchManagers": ["gomod"],
       "matchDepTypes": ["indirect"],
-      "enabled": true
+      "enabled": true,
+      "groupName": "indirect Go modules",
+      "groupSlug": "go-indirect"
+    },
+    {
+      "description": "No major updates of indirect Go modules: the direct dependencies decide those.",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ],
   "customManagers": [
