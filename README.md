@@ -22,6 +22,8 @@ Repository-specific settings go next to `extends` in that file.
 - **Weekly:** Renovate opens and updates its pull requests before 06:00 UTC on Mondays.
 - **Minor and patch updates** for all dependencies come in **one** pull request a week.
 - **Major updates** get their own pull request each, because they can break things and need their own review.
+- **Security fixes right away:** Renovate checks every dependency against the [OSV](https://osv.dev/) vulnerability database as well as GitHub's alerts. A fix for a known vulnerability gets its own pull request at once, outside the weekly schedule and the minor and patch group.
+- **Indirect Go modules** (`// indirect` in `go.mod`) are updated like direct ones. Renovate skips them by default, so a fix in a module like `golang.org/x/net` would otherwise wait until a direct dependency pulled it in. After each Go update Renovate runs `go mod tidy`.
 - **Versions pinned in workflows and composite actions** are updated when they're marked with a comment on the line above. Without the comment, Renovate doesn't see them.
 
   ```yaml
