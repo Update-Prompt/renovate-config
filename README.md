@@ -34,9 +34,14 @@ Repository-specific settings go next to `extends` in that file.
   ```
 
   It applies to `.github/workflows/*.yml` and `action.yml` files. `datasource` is one of Renovate's [datasources](https://docs.renovatebot.com/modules/datasource/), such as `npm`, `github-releases` or `docker`.
+- **GitHub Actions are pinned by commit SHA**, with the version in a comment: `uses: actions/checkout@<sha> # v7.0.1`. A tag such as `v7` can be moved to other code by whoever controls the action; a SHA can't. Renovate turns tags into SHAs once, then updates the SHA and the comment like any other version, so these updates come in the weekly pull request too. This includes `Update-Prompt/shared-actions`, so a moved `v1` tag changes nothing until its update pull request is merged.
 - Everything else is Renovate's [`config:recommended`](https://docs.renovatebot.com/presets-config/#configrecommended), including the Dependency Dashboard issue that lists all pending updates.
 
 Each repository's CI runs on Renovate's pull requests like on any other, so a breaking update shows up before it's merged.
+
+## Checks
+
+[`validate.yml`](.github/workflows/validate.yml) runs Renovate's config validator on every JSON file here (`default.json`, `renovate.json` and any new preset) in every pull request that changes them. A broken preset doesn't fail anywhere else: Renovate just stops updating every repository that uses it.
 
 ## Requirements
 

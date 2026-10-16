@@ -1,0 +1,54 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # Finds out what changed. The validator skips when no config changed; a skipped
+  # job still counts as passed for branch protection. If this job fails, it runs.
+  changes:
+    name: changed files
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read # to list a pull request's files
+    outputs:
+      config: ${{ steps.filter.outputs.config }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name != 'pull_request'
+      - id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            config:
+              - '*.json'
+              - '.github/workflows/validate.yml'
+
+  # A broken preset doesn't fail anywhere: Renovate just stops updating every repository
+  # that uses it. --strict also fails on options Renovate wants migrated.
+  validate:
+    name: Renovate config is valid
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.config == 'true') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # renovate: datasource=node-version depName=node
+          node-version: 24
+      - name: Validate the presets and this repository's config
+        env:
+          # renovate: datasource=npm depName=renovate
+          RENOVATE_VERSION: 44.165.0
+        # Every JSON file here is a preset or renovate.json. --no-global checks them as
+        # repository config, which is what a preset is.
+        run: npx --yes --package "renovate@$RENOVATE_VERSION" -- renovate-config-validator --strict --no-global ./*.json
