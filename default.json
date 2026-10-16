@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Update Prompt defaults: weekly updates, minor and patch updates grouped, major updates separately, security fixes right away",
-  "extends": ["config:recommended"],
+  "description": "Update Prompt defaults: weekly updates, minor and patch updates grouped, major updates separately, security fixes right away, GitHub Actions pinned by commit SHA",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigestsToSemver"],
   "schedule": ["before 6am on monday"],
   "timezone": "Etc/UTC",
   "osvVulnerabilityAlerts": true,
