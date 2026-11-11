@@ -19,7 +19,7 @@ Repository-specific settings go next to `extends` in that file.
 
 [`default.json`](default.json):
 
-- **Weekly:** Renovate opens and updates its pull requests before 06:00 UTC on Mondays.
+- **Weekly:** Renovate opens and updates its pull requests on Mondays (all day, UTC). The hosted app runs only every few hours, so a shorter window can be missed for weeks.
 - **Minor and patch updates** for all dependencies come in **one** pull request a week.
 - **Major updates** get their own pull request each, because they can break things and need their own review.
 - **Security fixes right away:** Renovate checks dependencies against the [OSV](https://osv.dev/) vulnerability database. A fix for a known vulnerability gets its own pull request at once, outside the weekly schedule and the groups. OSV covers package ecosystems such as Go modules and npm, not GitHub Actions or Docker images.
