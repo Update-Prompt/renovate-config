@@ -8,8 +8,12 @@ import { test } from 'node:test';
 const preset = JSON.parse(readFileSync(new URL('../default.json', import.meta.url), 'utf8'));
 const [manager] = preset.customManagers;
 
-// Renovate writes a pattern as /.../ and the match strings as plain regexes
-const filePatterns = manager.managerFilePatterns.map((pattern) => new RegExp(pattern.slice(1, -1)));
+// The file patterns here are regexes written as /.../, without flags; the match strings
+// are plain regexes. Renovate runs them with RE2, which takes these patterns the same way.
+const filePatterns = manager.managerFilePatterns.map((pattern) => {
+  assert.match(pattern, /^\/.+\/$/, `Expected ${pattern} to be a /regex/ without flags`);
+  return new RegExp(pattern.slice(1, -1));
+});
 const matchStrings = manager.matchStrings.map((pattern) => new RegExp(pattern, 'g'));
 
 function dependencies(content) {
@@ -60,6 +64,17 @@ test('reads each pinned version', () => {
   ];
   for (const { content, expected } of cases) {
     assert.deepEqual(dependencies(content), [expected]);
+  }
+});
+
+test("reads the versions pinned in this repository's workflow", () => {
+  const workflow = readFileSync(new URL('../.github/workflows/validate.yml', import.meta.url), 'utf8');
+  assert.deepEqual(
+    dependencies(workflow).map(({ depName }) => depName),
+    ['node', 'renovate']
+  );
+  for (const { currentValue } of dependencies(workflow)) {
+    assert.match(currentValue, /^\d+(\.\d+)*$/);
   }
 });
 

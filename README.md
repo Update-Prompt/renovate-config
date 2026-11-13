@@ -41,7 +41,7 @@ Each repository's CI runs on Renovate's pull requests like on any other, so a br
 
 ## Checks
 
-[`validate.yml`](.github/workflows/validate.yml) runs Renovate's config validator on every JSON file here (`default.json`, `renovate.json` and any new preset) in every pull request that changes them. A broken preset doesn't fail anywhere else: Renovate just stops updating every repository that uses it.
+[`validate.yml`](.github/workflows/validate.yml) runs Renovate's config validator on every JSON file here (`default.json`, `renovate.json` and any new preset) in every pull request that changes them or the tests. A broken preset doesn't fail anywhere else: Renovate just stops updating every repository that uses it.
 
 It also runs [`tests/custom-manager.test.mjs`](tests/custom-manager.test.mjs) (`node --test tests/*.test.mjs`), which runs the `# renovate:` custom manager on sample lines from our workflows and actions. The validator only checks that the pattern compiles, not that it still finds the versions.
 

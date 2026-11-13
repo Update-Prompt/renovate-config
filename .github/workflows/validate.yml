@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  # Finds out what changed. The validator skips when no config changed; a skipped
+  # Finds out what changed. The validator and the tests skip when no config or test changed; a skipped
   # job still counts as passed for branch protection. If this job fails, it runs.
   changes:
     name: changed files
@@ -56,4 +56,6 @@ jobs:
       # The validator checks that a regex compiles, not that it finds anything, so a broken
       # '# renovate:' pattern would silently stop every tool update
       - name: Run the custom manager on sample lines
+        # Also when the validator failed, so both problems show in one run
+        if: ${{ !cancelled() }}
         run: node --test tests/*.test.mjs
