@@ -28,6 +28,7 @@ jobs:
           filters: |
             config:
               - '*.json'
+              - 'tests/**'
               - '.github/workflows/validate.yml'
 
   # A broken preset doesn't fail anywhere: Renovate just stops updating every repository
@@ -52,3 +53,7 @@ jobs:
         # Every JSON file here is a preset or renovate.json. --no-global checks them as
         # repository config, which is what a preset is.
         run: npx --yes --package "renovate@$RENOVATE_VERSION" -- renovate-config-validator --strict --no-global ./*.json
+      # The validator checks that a regex compiles, not that it finds anything, so a broken
+      # '# renovate:' pattern would silently stop every tool update
+      - name: Run the custom manager on sample lines
+        run: node --test tests/*.test.mjs
