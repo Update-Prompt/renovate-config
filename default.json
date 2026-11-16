@@ -6,6 +6,9 @@
   "timezone": "Etc/UTC",
   "osvVulnerabilityAlerts": true,
   "postUpdateOptions": ["gomodTidy"],
+  "constraints": {
+    "npm": "^11"
+  },
   "packageRules": [
     {
       "description": "One weekly PR with all minor and patch updates. Major updates keep their own PRs, because they can break things and need their own review.",
