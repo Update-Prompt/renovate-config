@@ -25,6 +25,7 @@ Repository-specific settings go next to `extends` in that file.
 - **Security fixes right away:** Renovate checks dependencies against the [OSV](https://osv.dev/) vulnerability database. A fix for a known vulnerability gets its own pull request at once, outside the weekly schedule and the groups. OSV covers package ecosystems such as Go modules and npm, not GitHub Actions or Docker images.
 - **Indirect Go modules** (`// indirect` in `go.mod`) are updated too, in one weekly pull request of their own and without major updates. Renovate skips them by default, so a fix in a module like `golang.org/x/net` would otherwise wait until a direct dependency pulled it in.
 - **`go mod tidy`** runs after each Go update. A repository that sets its own `postUpdateOptions` replaces the preset's, so it must list `gomodTidy` too.
+- **Lockfiles are updated with npm 11**, the npm that ships with Node 24, which the repositories and their CI use. Renovate would otherwise use the newest npm. npm 12 refuses some updates that npm 11 makes: it blocks fetching `@tailwindcss/oxide-wasm32-wasi` 4.3 (`EALLOWREMOTE`), so `package-lock.json` stays out of date and `npm ci` fails. Change the version here when the repositories move to a Node version that ships a newer npm.
 - **Versions pinned in workflows and composite actions** are updated when they're marked with a comment on the line above. Without the comment, Renovate doesn't see them.
 
   ```yaml
