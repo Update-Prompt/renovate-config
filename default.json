@@ -1,25 +1,67 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Update Prompt defaults: weekly updates, minor and patch updates grouped, major updates separately, security fixes right away, GitHub Actions pinned by commit SHA",
+  "description": "Update Prompt defaults: weekly updates, patch updates and CI tools merged on their own once every check passes, minor updates grouped for review, major updates separately, security fixes right away, GitHub Actions pinned by commit SHA",
   "extends": ["config:recommended", "helpers:pinGitHubActionDigestsToSemver"],
   "schedule": ["* * * * 1"],
   "timezone": "Etc/UTC",
   "osvVulnerabilityAlerts": true,
   "postUpdateOptions": ["gomodTidy"],
+  "platformAutomerge": false,
   "packageRules": [
     {
-      "description": "One weekly PR with all minor and patch updates. Major updates keep their own PRs, because they can break things and need their own review.",
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "groupName": "minor and patch updates",
-      "groupSlug": "minor-and-patch"
+      "description": "One weekly PR with all minor updates (and pins and digests outside CI). They can change behaviour, so a person merges them after review.",
+      "matchUpdateTypes": ["minor", "pin", "pinDigest", "digest"],
+      "groupName": "minor updates",
+      "groupSlug": "minor"
     },
     {
-      "description": "Indirect Go modules too, in a weekly PR of their own. Renovate skips them by default, so a fix in a module like golang.org/x/net would wait until a direct dependency pulled it in. A separate group keeps a bad indirect bump from holding back the other updates.",
+      "description": "Patch updates and CI tools (the rules below), in one weekly PR that Renovate merges itself once every check has passed. Each release waits 3 days first, so a bad or hijacked release is likely pulled before it reaches us.",
+      "matchUpdateTypes": ["patch"],
+      "groupName": "patch updates and CI tools",
+      "groupSlug": "patch-and-ci-tools",
+      "automerge": true,
+      "minimumReleaseAge": "3 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
+      "description": "CI tools join the automerged PR for every update type but major: they run only in CI, so CI shows whether they still work. For GitHub Actions that means the actions and reusable workflows in `uses:`, not the Go, Node, runner or container versions in workflows, which a person reviews. Digest updates (a tag moved to other code) also wait for a person: that's what SHA pinning protects against.",
+      "matchManagers": ["github-actions"],
+      "matchDepTypes": ["action", "workflow"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest"],
+      "groupName": "patch updates and CI tools",
+      "groupSlug": "patch-and-ci-tools",
+      "automerge": true,
+      "minimumReleaseAge": "3 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
+      "description": "Tool versions pinned with a '# renovate:' comment in workflows and actions, such as linters, are CI tools too.",
+      "matchManagers": ["custom.regex"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest"],
+      "groupName": "patch updates and CI tools",
+      "groupSlug": "patch-and-ci-tools",
+      "automerge": true,
+      "minimumReleaseAge": "3 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
+    },
+    {
+      "description": "Indirect Go modules too, in weekly PRs of their own: patch updates are merged by Renovate like above, minor updates wait for review. Renovate skips them by default, so a fix in a module like golang.org/x/net would wait until a direct dependency pulled it in. Separate groups keep a bad indirect bump from holding back the other updates.",
       "matchManagers": ["gomod"],
       "matchDepTypes": ["indirect"],
       "enabled": true,
       "groupName": "indirect Go modules",
       "groupSlug": "go-indirect"
+    },
+    {
+      "description": "Indirect Go patch updates are merged by Renovate once every check has passed, after the same 3-day wait.",
+      "matchManagers": ["gomod"],
+      "matchDepTypes": ["indirect"],
+      "matchUpdateTypes": ["patch"],
+      "groupName": "indirect Go module patches",
+      "groupSlug": "go-indirect-patch",
+      "automerge": true,
+      "minimumReleaseAge": "3 days",
+      "minimumReleaseAgeBehaviour": "timestamp-optional"
     },
     {
       "description": "No major updates of indirect Go modules: the direct dependencies decide those.",
