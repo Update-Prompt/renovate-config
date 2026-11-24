@@ -5,7 +5,7 @@
   "schedule": ["* * * * 1"],
   "timezone": "Etc/UTC",
   "osvVulnerabilityAlerts": true,
-  "postUpdateOptions": ["gomodTidy"],
+  "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
   "platformAutomerge": false,
   "packageRules": [
     {
