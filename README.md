@@ -35,7 +35,7 @@ Repository-specific settings go next to `extends` in that file.
 - **3 days' wait:** a release Renovate merges on its own must be at least 3 days old, so a broken or hijacked release has time to be pulled first. Updates without a release date don't wait. Since Renovate opens pull requests only on Mondays, a release from Friday to Sunday waits until the Monday after, up to 10 days.
 - **Security fixes right away:** Renovate checks dependencies against the [OSV](https://osv.dev/) vulnerability database. A fix for a known vulnerability gets its own pull request at once, outside the weekly schedule and the groups. OSV covers package ecosystems such as Go modules and npm, not GitHub Actions or Docker images. A fix that is a patch update or a CI tool update is merged by Renovate once every check passes, without the 3 days' wait; other fixes wait for a person.
 - **Indirect Go modules** (`// indirect` in `go.mod`) are updated too, in weekly pull requests of their own and without major updates: one with patch updates that Renovate merges like above, and one with minor updates for a person. Renovate skips them by default, so a fix in a module like `golang.org/x/net` would otherwise wait until a direct dependency pulled it in.
-- **`go mod tidy`** runs after each Go update. A repository that sets its own `postUpdateOptions` replaces the preset's, so it must list `gomodTidy` too.
+- **`go mod tidy`** runs after each Go update, and a major Go update also changes the import paths in the code (for example `go.yaml.in/yaml/v3` to `/v4`), except for `gopkg.in` modules, which still need hand edits. A repository that sets its own `postUpdateOptions` replaces the preset's, so it must list `gomodTidy` and `gomodUpdateImportPaths` too.
 - **Versions pinned in workflows and composite actions** are updated when they're marked with a comment on the line above. Without the comment, Renovate doesn't see them.
 
   ```yaml
@@ -54,7 +54,7 @@ Each repository's CI runs on Renovate's pull requests like on any other, so a br
 
 [`validate.yml`](.github/workflows/validate.yml) runs Renovate's config validator on every JSON file here (`default.json`, `renovate.json` and any new preset) in every pull request that changes them or the tests. A broken preset doesn't fail anywhere else: Renovate just stops updating every repository that uses it.
 
-It also runs [`tests/automerge.test.mjs`](tests/automerge.test.mjs), which checks that only patch updates and non-major CI tools are merged by Renovate, and [`tests/custom-manager.test.mjs`](tests/custom-manager.test.mjs) (`node --test tests/*.test.mjs`), which runs the `# renovate:` custom manager on sample lines from our workflows and actions. The validator only checks that the pattern compiles, not that it still finds the versions.
+It also runs [`tests/automerge.test.mjs`](tests/automerge.test.mjs), which checks that only patch updates and non-major CI tools are merged by Renovate, [`tests/go.test.mjs`](tests/go.test.mjs), which guards the Go post-update steps from being removed, and [`tests/custom-manager.test.mjs`](tests/custom-manager.test.mjs) (`node --test tests/*.test.mjs`), which runs the `# renovate:` custom manager on sample lines from our workflows and actions. The validator only checks that the pattern compiles, not that it still finds the versions.
 
 ## Requirements
 
